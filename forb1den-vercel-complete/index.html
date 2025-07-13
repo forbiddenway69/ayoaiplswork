@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Forb1den GPT</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #111; color: white; }
+    #chat { height: 400px; overflow-y: scroll; background: #222; padding: 10px; border: 1px solid #444; }
+    .user { color: #4fc3f7; }
+    .bot { color: #81c784; }
+    input, button { padding: 10px; margin-top: 10px; width: 100%; border: none; }
+    button { background: #4fc3f7; color: black; cursor: pointer; }
+    button:hover { background: #0288d1; }
+  </style>
+</head>
+<body>
+  <h2>🤖 Forb1den-GPT</h2>
+  <div id="chat"></div>
+  <input id="input" placeholder="Type your message..." />
+  <button onclick="send()">Send</button>
+
+  <script>
+    async function send() {
+      const input = document.getElementById("input");
+      const chat = document.getElementById("chat");
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      chat.innerHTML += `<p class="user"><strong>You:</strong> ${userText}</p>`;
+      input.value = "";
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "anthropic/claude-3-haiku",
+            messages: [{ role: "user", content: userText }]
+          })
+        });
+
+        const data = await response.json();
+        const reply = data.choices?.[0]?.message?.content || "⚠️ No reply received.";
+        chat.innerHTML += `<p class="bot"><strong>Forb1den:</strong> ${reply}</p>`;
+        chat.scrollTop = chat.scrollHeight;
+      } catch (err) {
+        chat.innerHTML += `<p class="bot"><strong>Error:</strong> ${err.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
